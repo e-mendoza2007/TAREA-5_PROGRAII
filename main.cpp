@@ -5,7 +5,7 @@
 
 using namespace std;
 
-
+//Inicio de edición de Integrante 1
 class Voto {
     string idVotante;
     string opcionElegida;
@@ -92,7 +92,7 @@ string generarHash(const Block& bloque){
 
     return to_string(funcionHash(datos));
 }
-
+//Fin de edición de Integrante 1
 
 class Blockchain {
 private:
@@ -135,7 +135,7 @@ public:
 };
 
 int main() {
-    //Puse esto en el main para que puedan probar la parte dle integrante 1 y vean si les funciona, normal lo pueden borrar
+    //Puse esto en el main para que puedan probar la parte del integrante 1 y vean si les funciona, normal lo pueden borrar
     //========================================================
     vector<Voto> votos;
 
