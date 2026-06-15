@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -35,6 +37,7 @@ class Block {
     vector<Voto> votos;
     int nonce;
     string current_hash;
+public:
 
     void setNonce(int nuevoNonce) { //Si gustan lo mueven a public, no sé si este junto a SetCurrentHash deberain estar aqui (lo digo por el contexto de que son votaciones), de igual se puede acceder con una función amiga
         nonce=nuevoNonce;
@@ -44,7 +47,6 @@ class Block {
         current_hash=hash;
     }
 
-public:
     Block(int indiceBloque, string hashAnterior, vector<Voto> listaVotos) {
         index=indiceBloque;
         previous_hash=hashAnterior;
@@ -89,8 +91,11 @@ string generarHash(const Block& bloque){
     datos+=to_string(bloque.getNonce());
 
     hash<string> funcionHash;
+    stringstream ss;
 
-    return to_string(funcionHash(datos));
+    ss<<setw(16)<<setfill('0')<<hex<<funcionHash(datos);
+
+    return ss.str();
 }
 //Fin de edición de Integrante 1
 
@@ -98,15 +103,61 @@ class Blockchain {
 private:
     vector<Block> cadena;
 
+    Blockchain() {}
+
 public:
 
-    string mineBlock(int dificultad) {
-        string hash;
-        while (hash != "") {
-            hash = generarHash();
-        }
-    };
 
+    static Blockchain& getInstance() {
+        static Blockchain instancia;
+        return instancia;
+    }
+
+    void insertar_bloque(const Block& bloque) {
+        cadena.push_back(bloque);
+    }
+
+    void mineBlock(int dificultad) {
+
+
+        if (cadena.empty()) {
+            return;
+        }
+
+
+        Block& bloque = cadena.back();
+
+        string objetivo(dificultad, '0');
+
+        while (bloque.getCurrentHash().substr(0, dificultad) != objetivo) {
+            bloque.setNonce(bloque.getNonce() + 1);
+
+            string nuevoHash = generarHash(bloque);
+
+            bloque.setCurrentHash(nuevoHash);
+        }
+
+        cout << "Bloque minado: " << bloque.getCurrentHash()<< endl;
+    }
+
+    bool isChainValid() {
+
+        for (int i = 1; i < cadena.size(); i++) {
+
+            Block& actual = cadena[i];
+            Block& anterior = cadena[i - 1];
+
+            if (actual.getCurrentHash() != generarHash(actual)) {
+                return false;
+            }
+
+            if (actual.getPreviousHash() != anterior.getCurrentHash()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 };
 
 
@@ -119,7 +170,7 @@ public:
 class MesaElectoral : public MesaElectoralObserver {
 private:
     string nombreMesa;
-    Blockchain blockchainLocal;
+    Blockchain& blockchain = Blockchain::getInstance();
 
 public:
 
@@ -157,7 +208,17 @@ int main() {
         cout<<voto.getIdVotante()<<" -> "<<voto.getOpcionElegida()<<endl;
     }
     //=========================================================
-    
+
+
+
+    Blockchain& blockchain = Blockchain::getInstance();
+
+    blockchain.insertar_bloque(bloque1);
+
+    blockchain.mineBlock(3);
+
+    cout << blockchain.isChainValid();
+    cout << bloque1.getNonce() << endl;
     
     return 0;
 }
