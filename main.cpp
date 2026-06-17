@@ -218,10 +218,12 @@ int main() {
     CentroElectoralSubject redElectoral;
     MesaElectoral mesa1("Norte");
     MesaElectoral mesa2("Sur");
+    MesaElectoral mesa3("Centro");
 
     // conectar mesas a la red
     redElectoral.attach(&mesa1);
     redElectoral.attach(&mesa2);
+    redElectoral.attach(&mesa3);
 
     // creamos los votos y el bloque
     vector<Voto> votos;
